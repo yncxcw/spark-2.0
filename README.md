@@ -10,6 +10,12 @@ and Spark Streaming for stream processing.
 <http://spark.apache.org/>
 
 
+## About this project
+This is my personal repository for Spark, in which I implemented some experimental features.
+Feature included:
+1. Opportunistic containers support for Hadoop-3.0
+
+
 ## Online Documentation
 
 You can find the latest Spark documentation, including a programming
