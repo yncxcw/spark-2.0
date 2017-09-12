@@ -191,7 +191,6 @@ private[yarn] class YarnAllocator(
    * fulfilled.
    */
   private def getPendingAtLocation(location: String): Seq[ContainerRequest] = {
-    logInfo(s"request Type:"+ executionTypeRequest.getExecutionType)
 
     amClient.getMatchingRequests(RM_REQUEST_PRIORITY, location, executionTypeRequest.getExecutionType, resource).asScala
       .flatMap(_.asScala)
@@ -269,9 +268,8 @@ private[yarn] class YarnAllocator(
     val progressIndicator = 0.1f
     // Poll the ResourceManager. This doubles as a heartbeat if there are no pending container
     // requests.
-    logInfo("allocate rpc starts")
+    logInfo("allocate starts")
     val allocateResponse = amClient.allocate(progressIndicator)
-    logInfo("allocate rpc finishes")
     val allocatedContainers = allocateResponse.getAllocatedContainers()
 
     if (allocatedContainers.size > 0) {
@@ -305,6 +303,10 @@ private[yarn] class YarnAllocator(
     val missing = targetNumExecutors - numPendingAllocate - numExecutorsRunning
 
     logInfo(s"pending $numPendingAllocate allocated $numExecutorsRunning target $targetNumExecutors")
+
+    if (numExecutorsRunning == targetNumExecutors) {
+      logInfo("allocate finished")
+    }
 
     if (missing > 0) {
       logInfo(s"Will request $missing executor container(s), each with " +
@@ -478,7 +480,7 @@ private[yarn] class YarnAllocator(
     val matchingResource = Resource.newInstance(allocatedContainer.getResource.getMemory,
           resource.getVirtualCores)
 
-    logInfo(s"pending containers size1: " + getPendingAllocate.size)
+
     val matchingRequests = amClient.getMatchingRequests(allocatedContainer.getPriority, location,
       allocatedContainer.getExecutionType, matchingResource)
 
@@ -490,7 +492,6 @@ private[yarn] class YarnAllocator(
     } else {
       remaining += allocatedContainer
     }
-    logInfo(s"pending containers size2: " + getPendingAllocate.size)
   }
 
   /**
@@ -507,7 +508,6 @@ private[yarn] class YarnAllocator(
         s"for executor with ID $executorId")
 
       def updateInternalState(): Unit = synchronized {
-        logInfo(s"internal1 numExecutorRunning: $numExecutorsRunning enter")
         numExecutorsRunning += 1
 
         executorIdToContainer(executorId) = container
@@ -517,7 +517,6 @@ private[yarn] class YarnAllocator(
           new HashSet[ContainerId])
         containerSet += containerId
         allocatedContainerToHostMap.put(containerId, executorHostname)
-        logInfo(s"internal1 numExecutorRunning: $numExecutorsRunning end")
       }
 
 
@@ -563,7 +562,7 @@ private[yarn] class YarnAllocator(
       }
     }
 
-    logInfo(s"internal3 numExecutorRunning: $numExecutorsRunning")
+
   }
 
   // Visible for testing.
