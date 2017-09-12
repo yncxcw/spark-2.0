@@ -367,7 +367,7 @@ private[spark] class ApplicationMaster(
       securityMgr,
       localResources)
 
-    logInfo("fist allocation")
+    logInfo("allocation starts")
     allocator.allocateResources()
     logInfo("before launching report thread")
     reporterThread = launchReporterThread()

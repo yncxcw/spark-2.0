@@ -262,7 +262,7 @@ private[yarn] class YarnAllocator(
    * This must be synchronized because variables read in this method are mutated by other methods.
    */
   def allocateResources(): Unit = synchronized {
-    logInfo("allocation starts")
+
     updateResourceRequests()
 
     val progressIndicator = 0.1f
