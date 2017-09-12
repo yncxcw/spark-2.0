@@ -268,7 +268,7 @@ private[yarn] class YarnAllocator(
     val progressIndicator = 0.1f
     // Poll the ResourceManager. This doubles as a heartbeat if there are no pending container
     // requests.
-    logInfo("allocate starts")
+    logInfo("allocation starts")
     val allocateResponse = amClient.allocate(progressIndicator)
     val allocatedContainers = allocateResponse.getAllocatedContainers()
 
@@ -305,7 +305,7 @@ private[yarn] class YarnAllocator(
     logInfo(s"pending $numPendingAllocate allocated $numExecutorsRunning target $targetNumExecutors")
 
     if (numExecutorsRunning == targetNumExecutors) {
-      logInfo("allocate finished")
+      logInfo("allocation finish")
     }
 
     if (missing > 0) {
