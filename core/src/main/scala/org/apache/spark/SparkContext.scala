@@ -1487,7 +1487,7 @@ class SparkContext(config: SparkConf) extends Logging {
       "Can not directly broadcast RDDs; instead, call collect() and broadcast the result.")
     val bc = env.broadcastManager.newBroadcast[T](value, isLocal)
     val callSite = getCallSite
-    logInfo("Created broadcast " + bc.id + " from " + callSite.shortForm)
+    logInfo("Created broadcast " + bc.id + " from " + callSite.shortForm + "value: " + value)
     cleaner.foreach(_.registerBroadcastForCleanup(bc))
     bc
   }
