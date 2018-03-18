@@ -239,6 +239,8 @@ private[spark] class Client(
     capability.setVirtualCores(amCores)
 
 
+    //logInfo(s"setting up amRequest")
+
     val amRequest = Records.newRecord(classOf[ResourceRequest])
 
     amRequest.setResourceName(ResourceRequest.ANY)
@@ -252,6 +254,8 @@ private[spark] class Client(
         amRequest.setNodeLabelExpression(expr)
       case None =>
     }
+
+    logInfo(s"application request type $executionTypeRequest")
 
     appContext.setAMContainerResourceRequest(amRequest)
 
