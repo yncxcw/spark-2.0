@@ -78,6 +78,12 @@ private[spark] class Client(
   } else {
     sparkConf.get(AM_MEMORY).toInt
   }
+
+  private val executionTypeRequest = sparkConf.getBoolean("spark.yarn.opportunistic", false) match {
+    case true => ExecutionTypeRequest.newInstance(ExecutionType.OPPORTUNISTIC)
+    case _ => ExecutionTypeRequest.newInstance(ExecutionType.GUARANTEED)
+  }
+
   private val amMemoryOverhead = {
     val amMemoryOverheadEntry = if (isClusterMode) DRIVER_MEMORY_OVERHEAD else AM_MEMORY_OVERHEAD
     sparkConf.get(amMemoryOverheadEntry).getOrElse(
@@ -232,18 +238,22 @@ private[spark] class Client(
     capability.setMemory(amMemory + amMemoryOverhead)
     capability.setVirtualCores(amCores)
 
+
+    val amRequest = Records.newRecord(classOf[ResourceRequest])
+
+    amRequest.setResourceName(ResourceRequest.ANY)
+    amRequest.setPriority(Priority.newInstance(0))
+    amRequest.setCapability(capability)
+    amRequest.setNumContainers(1)
+    amRequest.setExecutionTypeRequest(executionTypeRequest)
+
     sparkConf.get(AM_NODE_LABEL_EXPRESSION) match {
       case Some(expr) =>
-        val amRequest = Records.newRecord(classOf[ResourceRequest])
-        amRequest.setResourceName(ResourceRequest.ANY)
-        amRequest.setPriority(Priority.newInstance(0))
-        amRequest.setCapability(capability)
-        amRequest.setNumContainers(1)
         amRequest.setNodeLabelExpression(expr)
-        appContext.setAMContainerResourceRequest(amRequest)
       case None =>
-        appContext.setResource(capability)
     }
+
+    appContext.setAMContainerResourceRequest(amRequest)
 
     sparkConf.get(ROLLED_LOG_INCLUDE_PATTERN).foreach { includePattern =>
       try {
